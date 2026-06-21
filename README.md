@@ -6,7 +6,7 @@ Personal notes and step-by-step walkthroughs for HackTheBox machines.
 
 | Machine | OS | Difficulty | Status | Writeup |
 |---|---|---|---|---|
-| Nimbus | Linux | Hard | ✅ user + root | [Nimbus.md](Nimbus.md) |
+| Nimbus | Linux | Hard | ✅ user + root | [Nimbus.md](Nimbus/Nimbus.md) |
 
 ---
 
